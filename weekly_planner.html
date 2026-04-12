@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的周看板</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Outfit:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1c1c2e;
+  --ink2: #3d3d5c;
+  --muted: #7b7b9d;
+  --faint: #efeff7;
+  --line: #dddded;
+  --bg: #f4f4fb;
+  --card: #ffffff;
+  --accent: #5b4fcf;
+  --accent-light: #ede9ff;
+  --gold: #e8a020;
+  --gold-light: #fff8e7;
+  --teal: #0e9f7e;
+  --teal-light: #e2f7f3;
+  --rose: #d94f70;
+  --rose-light: #fdeef3;
+  --sky: #2e86d4;
+  --sky-light: #e8f3fc;
+  --orange: #e06c2a;
+  --orange-light: #fef2e8;
+  --r: 14px;
+  --r-sm: 8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  font-size: 15px;
+}
+
+/* ── HEADER ── */
+.header {
+  background: linear-gradient(135deg, #2d1f6e 0%, #4a3aa5 60%, #6b5bd4 100%);
+  color: #fff;
+  padding: 20px 24px 0;
+  position: sticky; top: 0; z-index: 200;
+}
+.header-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.brand {
+  font-family: 'Noto Serif SC'; font-size: 18px; font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.brand span { opacity: 0.6; font-weight: 400; font-size: 13px; margin-left: 8px; font-family: 'Outfit'; }
+.week-nav {
+  display: flex; align-items: center; gap: 10px;
+}
+.week-nav button {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.1);
+  color: #fff; font-size: 13px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s;
+}
+.week-nav button:hover { background: rgba(255,255,255,0.25); }
+.week-range { font-size: 13px; opacity: 0.9; min-width: 130px; text-align: center; }
+
+/* TABS */
+.tabs {
+  display: flex; gap: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+.tab {
+  padding: 10px 18px; font-size: 13px; font-weight: 500;
+  color: rgba(255,255,255,0.6); cursor: pointer; border: none;
+  background: transparent; border-bottom: 2px solid transparent;
+  transition: all .2s; font-family: 'Outfit';
+}
+.tab.active { color: #fff; border-bottom-color: #fff; }
+
+/* ── MAIN ── */
+.main { max-width: 820px; margin: 0 auto; padding: 20px 16px 100px; }
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--card); border-radius: var(--r);
+  border: 1px solid var(--line); padding: 16px 18px;
+  margin-bottom: 12px;
+}
+.card-title {
+  font-family: 'Noto Serif SC'; font-size: 14px; font-weight: 600;
+  color: var(--ink2); margin-bottom: 12px;
+  display: flex; align-items: center; gap: 6px;
+}
+.dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── TODAY PAGE ── */
+.day-tabs {
+  display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.day-tab {
+  padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500;
+  border: 1px solid var(--line); background: var(--card);
+  color: var(--muted); cursor: pointer; transition: all .2s;
+}
+.day-tab.active {
+  background: var(--accent); color: #fff; border-color: var(--accent);
+}
+.day-tab.has-data { border-color: var(--teal); color: var(--teal); }
+.day-tab.active.has-data { background: var(--teal); border-color: var(--teal); color: #fff; }
+
+/* HABITS */
+.habits-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px;
+}
+.habit-item {
+  border: 1px solid var(--line); border-radius: var(--r-sm);
+  padding: 10px 12px; cursor: pointer; transition: all .2s;
+  display: flex; align-items: center; gap: 8px;
+}
+.habit-item:hover { border-color: var(--accent); }
+.habit-item.done {
+  background: var(--teal-light); border-color: var(--teal);
+}
+.habit-check {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid var(--line); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; transition: all .2s;
+}
+.habit-item.done .habit-check {
+  background: var(--teal); border-color: var(--teal); color: #fff;
+}
+.habit-name { font-size: 13px; font-weight: 500; flex: 1; }
+.habit-target { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* SUBJECTS */
+.subject-row {
+  display: flex; align-items: center; gap: 10px; padding: 10px 0;
+  border-bottom: 1px solid var(--faint);
+}
+.subject-row:last-child { border-bottom: none; }
+.subject-name {
+  font-size: 14px; font-weight: 500; min-width: 80px;
+}
+.subject-color { width: 6px; height: 28px; border-radius: 3px; flex-shrink: 0; }
+.time-input-wrap { flex: 1; display: flex; align-items: center; gap: 6px; }
+.time-input {
+  width: 70px; padding: 6px 8px; border: 1px solid var(--line);
+  border-radius: var(--r-sm); font-size: 13px; font-family: 'DM Mono';
+  color: var(--ink); background: var(--bg); outline: none;
+  text-align: center;
+}
+.time-input:focus { border-color: var(--accent); background: #fff; }
+.time-unit { font-size: 12px; color: var(--muted); }
+.time-btns { display: flex; gap: 4px; }
+.time-btn {
+  width: 26px; height: 26px; border-radius: 6px;
+  border: 1px solid var(--line); background: var(--card);
+  font-size: 14px; cursor: pointer; color: var(--muted);
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.time-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* REVIEW SECTION */
+.review-q { margin-bottom: 14px; }
+.review-q label {
+  display: block; font-size: 13px; font-weight: 500;
+  color: var(--ink2); margin-bottom: 6px;
+}
+.review-q label span { font-weight: 400; color: var(--muted); margin-left: 4px; }
+.review-q textarea {
+  width: 100%; padding: 10px 12px; border: 1px solid var(--line);
+  border-radius: var(--r-sm); font-size: 13px; font-family: 'Outfit';
+  color: var(--ink); background: var(--bg); outline: none; resize: vertical;
+  min-height: 70px; line-height: 1.6;
+}
+.review-q textarea:focus { border-color: var(--accent); background: #fff; }
+
+/* MOOD */
+.mood-row { display: flex; gap: 8px; }
+.mood-btn {
+  width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--line);
+  background: var(--card); font-size: 20px; cursor: pointer; transition: all .2s;
+}
+.mood-btn.active { border-color: var(--gold); transform: scale(1.15); }
+
+/* SAVE BTN */
+.save-btn {
+  width: 100%; padding: 13px; border-radius: var(--r);
+  background: var(--accent); color: #fff; border: none;
+  font-size: 15px; font-weight: 600; font-family: 'Outfit';
+  cursor: pointer; transition: all .2s; margin-top: 4px;
+}
+.save-btn:hover { background: #4a3aa5; transform: translateY(-1px); }
+.save-btn:active { transform: translateY(0); }
+
+/* ── WEEKLY REVIEW PAGE ── */
+.habit-progress-row {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+.progress-label { font-size: 13px; min-width: 80px; color: var(--ink2); }
+.progress-track {
+  flex: 1; height: 8px; background: var(--faint); border-radius: 4px; overflow: hidden;
+}
+.progress-fill { height: 100%; border-radius: 4px; transition: width .6s ease; }
+.progress-val { font-size: 12px; font-family: 'DM Mono'; color: var(--muted); min-width: 40px; text-align: right; }
+
+/* BAR CHART */
+.bar-chart { display: flex; gap: 8px; align-items: flex-end; height: 120px; padding: 0 4px; }
+.bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.bar { width: 100%; border-radius: 4px 4px 0 0; transition: height .5s ease; min-height: 4px; }
+.bar-label { font-size: 11px; color: var(--muted); }
+.bar-val { font-size: 11px; font-family: 'DM Mono'; color: var(--ink2); }
+
+/* SUBJECT SUMMARY */
+.subj-summary-row {
+  display: flex; align-items: center; gap: 10px; padding: 8px 0;
+  border-bottom: 1px solid var(--faint);
+}
+.subj-summary-row:last-child { border-bottom: none; }
+.subj-bar-wrap { flex: 1; height: 6px; background: var(--faint); border-radius: 3px; overflow: hidden; }
+.subj-bar-fill { height: 100%; border-radius: 3px; }
+.subj-total { font-size: 12px; font-family: 'DM Mono'; color: var(--muted); min-width: 55px; text-align: right; }
+
+/* ── STATS PAGE ── */
+.stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 12px; }
+.stat-card {
+  background: var(--faint); border-radius: var(--r-sm);
+  padding: 14px; text-align: center;
+}
+.stat-num { font-size: 26px; font-weight: 600; font-family: 'DM Mono'; color: var(--accent); }
+.stat-lbl { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* SEMESTER TABLE */
+.sem-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.sem-table th, .sem-table td {
+  padding: 8px 10px; border-bottom: 1px solid var(--faint); text-align: left;
+}
+.sem-table th { font-weight: 500; color: var(--muted); font-size: 12px; }
+.sem-table td:last-child { text-align: right; font-family: 'DM Mono'; }
+
+/* EXPORT BTN */
+.export-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 18px; border-radius: var(--r);
+  border: 1.5px solid var(--accent); background: var(--accent-light);
+  color: var(--accent); font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all .2s; font-family: 'Outfit';
+}
+.export-btn:hover { background: var(--accent); color: #fff; }
+
+/* BADGE */
+.badge {
+  display: inline-block; font-size: 11px; padding: 2px 8px;
+  border-radius: 10px; font-weight: 500;
+}
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(60px);
+  background: var(--ink); color: #fff; padding: 10px 20px;
+  border-radius: 20px; font-size: 13px; transition: transform .3s ease;
+  z-index: 999; white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* SECTION TITLE */
+.sec-title {
+  font-family: 'Noto Serif SC'; font-size: 17px; font-weight: 600;
+  color: var(--ink); margin-bottom: 4px;
+}
+.sec-sub { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+
+/* DIVIDER */
+.div { height: 1px; background: var(--line); margin: 16px 0; }
+
+/* EMPTY */
+.empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 14px; }
+
+/* VIDEO PROJECT */
+.video-card {
+  background: linear-gradient(135deg, var(--accent-light), #f0ebff);
+  border: 1px solid #c9bff5; border-radius: var(--r); padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.video-input {
+  width: 100%; padding: 8px 10px; border: 1px solid #c9bff5;
+  border-radius: var(--r-sm); font-size: 13px; font-family: 'Outfit';
+  background: rgba(255,255,255,0.7); color: var(--ink); outline: none;
+  margin-top: 8px;
+}
+.video-input:focus { border-color: var(--accent); background: #fff; }
+
+@media (max-width: 480px) {
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+  .habits-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="brand">我的周看板 <span id="semLabel">第1学期</span></div>
+    <div class="week-nav">
+      <button onclick="changeWeek(-1)">‹</button>
+      <div class="week-range" id="weekRange">—</div>
+      <button onclick="changeWeek(1)">›</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="showPage('today', this)">📋 今日打卡</button>
+    <button class="tab" onclick="showPage('review', this)">🔄 周检视</button>
+    <button class="tab" onclick="showPage('stats', this)">📊 学期总览</button>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ══════════ TODAY PAGE ══════════ -->
+<div id="page-today" class="page active">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;margin-top:4px;">
+    <div>
+      <div class="sec-title" id="todayTitle">今日打卡</div>
+      <div class="sec-sub">记录今天的学习时间和习惯完成情况</div>
+    </div>
+    <div style="font-family:'DM Mono';font-size:12px;color:var(--muted)" id="todayDate"></div>
+  </div>
+
+  <!-- Day selector -->
+  <div class="day-tabs" id="dayTabs"></div>
+
+  <!-- HABITS -->
+  <div class="card">
+    <div class="card-title"><div class="dot" style="background:var(--teal)"></div>每日习惯打卡</div>
+    <div class="habits-grid" id="habitsGrid"></div>
+  </div>
+
+  <!-- STUDY TIME -->
+  <div class="card">
+    <div class="card-title"><div class="dot" style="background:var(--sky)"></div>学习时间记录 <span style="font-family:'DM Mono';font-size:11px;color:var(--muted);margin-left:auto">分钟</span></div>
+    <div id="subjectRows"></div>
+  </div>
+
+  <!-- VIDEO PROJECT -->
+  <div class="video-card">
+    <div class="card-title" style="color:var(--accent)"><div class="dot" style="background:var(--accent)"></div>政治人物视频项目</div>
+    <div style="font-size:13px;color:var(--ink2)">本周人物：</div>
+    <input class="video-input" id="videoFigure" placeholder="例如：基辛格 · 地缘政治现实主义大师" oninput="autoSave()">
+    <div style="font-size:13px;color:var(--ink2);margin-top:10px;">今天的研究进展：</div>
+    <textarea class="video-input" id="videoProgress" placeholder="今天读了什么、思考了什么、准备说什么..." style="min-height:60px;resize:vertical" oninput="autoSave()"></textarea>
+  </div>
+
+  <!-- EVENING REVIEW (三问法) -->
+  <div class="card">
+    <div class="card-title"><div class="dot" style="background:var(--gold)"></div>晚间三问自省 <span style="font-size:11px;color:var(--muted);font-weight:400;margin-left:4px">睡前10分钟</span></div>
+    <div class="review-q">
+      <label>1. 今天哪里突破了？<span>有什么新发现或做到了平时做不到的事？</span></label>
+      <textarea id="q1" placeholder="写下今天让你感到「我做到了」的一件事..." oninput="autoSave()"></textarea>
+    </div>
+    <div class="review-q">
+      <label>2. 哪个决定可以优化？<span>如果重来，你会怎么做？</span></label>
+      <textarea id="q2" placeholder="今天哪件事做完之后觉得「其实可以更好」..." oninput="autoSave()"></textarea>
+    </div>
+    <div class="review-q">
+      <label>3. 明天要改进什么？<span>一件具体的事</span></label>
+      <textarea id="q3" placeholder="写一件明天想做到的具体的事..." oninput="autoSave()"></textarea>
+    </div>
+    <div class="review-q">
+      <label>今天的心情</label>
+      <div class="mood-row" id="moodRow">
+        <button class="mood-btn" data-mood="5" onclick="setMood(5,this)">😄</button>
+        <button class="mood-btn" data-mood="4" onclick="setMood(4,this)">🙂</button>
+        <button class="mood-btn" data-mood="3" onclick="setMood(3,this)">😐</button>
+        <button class="mood-btn" data-mood="2" onclick="setMood(2,this)">😔</button>
+        <button class="mood-btn" data-mood="1" onclick="setMood(1,this)">😤</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="save-btn" onclick="saveDay()">✓ 保存今天的记录</button>
+</div>
+
+<!-- ══════════ WEEKLY REVIEW PAGE ══════════ -->
+<div id="page-review" class="page">
+
+  <div style="margin-bottom:16px;margin-top:4px;">
+    <div class="sec-title">周检视</div>
+    <div class="sec-sub" id="reviewSubTitle">本周完成情况总结与反思</div>
+  </div>
+
+  <!-- HABIT PROGRESS -->
+  <div class="card">
+    <div class="card-title"><div class="dot" style="background:var(--teal)"></div>习惯完成情况</div>
+    <div id="habitProgress"></div>
+  </div>
+
+  <!-- STUDY TIME CHART -->
+  <div class="card">
+    <div class="card-title"><div class="dot" style="background:var(--sky)"></div>每日学习时间分布</div>
+    <div class="bar-chart" id="dailyBarChart"></div>
+    <div class="div"></div>
+    <div class="card-title" style="margin-bottom:8px;"><div class="dot" style="background:var(--accent)"></div>各科时间汇总</div>
+    <div id="subjectSummary"></div>
+  </div>
+
+  <!-- WEEKLY REFLECTION -->
+  <div class="card">
+    <div class="card-title"><div class="dot" style="background:var(--gold)"></div>本周总结与下周计划</div>
+    <div class="review-q">
+      <label>本周最大的收获</label>
+      <textarea id="wk_gain" placeholder="这一周，你真正学到了什么？不只是知识，也包括关于自己的发现..." oninput="saveWeekly()"></textarea>
+    </div>
+    <div class="review-q">
+      <label>本周最需要改进的一件事</label>
+      <textarea id="wk_improve" placeholder="诚实地写——是什么让这周没有达到你的期待？" oninput="saveWeekly()"></textarea>
+    </div>
+    <div class="review-q">
+      <label>下周一个具体的改变</label>
+      <textarea id="wk_next" placeholder="不要写很多目标，只写一件你真的会做到的事..." oninput="saveWeekly()"></textarea>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+    <button class="export-btn" onclick="exportCSV()">📥 导出本周数据 (CSV)</button>
+    <button class="export-btn" onclick="exportWeekSummary()">📄 导出周报告</button>
+  </div>
+</div>
+
+<!-- ══════════ STATS PAGE ══════════ -->
+<div id="page-stats" class="page">
+
+  <div style="margin-bottom:16px;margin-top:4px;">
+    <div class="sec-title">学期总览</div>
+    <div class="sec-sub">时间投入在哪里，成果就在哪里</div>
+  </div>
+
+  <div class="stat-grid" id="semesterStats"></div>
+
+  <div class="card">
+    <div class="card-title"><div class="dot" style="background:var(--sky)"></div>各科累计时间（学期）</div>
+    <div id="semSubjectTable"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><div class="dot" style="background:var(--teal)"></div>习惯坚持率</div>
+    <div id="semHabitStats"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><div class="dot" style="background:var(--accent)"></div>视频项目进度</div>
+    <div id="videoStats"></div>
+  </div>
+
+  <div style="margin-top:12px;">
+    <button class="export-btn" onclick="exportSemester()">📥 导出学期完整数据</button>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════ CONFIG ══════════
+const SUBJECTS = [
+  { name: '数学', color: '#5b4fcf', key: 'math' },
+  { name: '英语', color: '#0e9f7e', key: 'english' },
+  { name: '语文', color: '#d94f70', key: 'chinese' },
+  { name: '科学', color: '#2e86d4', key: 'science' },
+  { name: '历史', color: '#e8a020', key: 'history' },
+  { name: '音乐剧', color: '#8b5cf6', key: 'musical' },
+  { name: '名人研究', color: '#e06c2a', key: 'research' },
+  { name: '其他', color: '#7b7b9d', key: 'other' },
+];
+
+const HABITS = [
+  { name: '早起冥想', key: 'meditation', target: '每天·20min' },
+  { name: '平板支撑', key: 'plank', target: '每天·3min' },
+  { name: '英语听写', key: 'dictation', target: '每天' },
+  { name: '阅读', key: 'reading', target: '每天' },
+  { name: '运动/健身', key: 'exercise', target: '每天' },
+  { name: '感恩日记', key: 'gratitude', target: '每天·3件' },
+];
+
+const DAYS = ['周一','周二','周三','周四','周五','周六','周日'];
+const DAY_KEYS = ['mon','tue','wed','thu','fri','sat','sun'];
+
+// ══════════ STATE ══════════
+let currentWeekStart = getWeekStart(new Date());
+let currentDayIdx = Math.min(new Date().getDay() === 0 ? 6 : new Date().getDay()-1, 6);
+let data = {}; // { weekKey: { days: {dayKey: {habits,subjects,q1,q2,q3,mood,video}}, weekly: {} } }
+
+// ══════════ STORAGE ══════════
+function storageKey() { return 'weeklyPlanner_v1'; }
+function loadData() {
+  try { data = JSON.parse(localStorage.getItem(storageKey()) || '{}'); } catch(e) { data = {}; }
+}
+function saveData() {
+  try { localStorage.setItem(storageKey(), JSON.stringify(data)); } catch(e) {}
+}
+function getWeekKey(d) {
+  const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function getWeekStart(d) {
+  const day = d.getDay(); // 0=Sun
+  const diff = day === 0 ? -6 : 1 - day;
+  const mon = new Date(d); mon.setDate(d.getDate() + diff); mon.setHours(0,0,0,0);
+  return mon;
+}
+function addDays(d, n) { const r = new Date(d); r.setDate(d.getDate()+n); return r; }
+function weekKey() { return getWeekKey(currentWeekStart); }
+function ensureWeek() {
+  if (!data[weekKey()]) data[weekKey()] = { days: {}, weekly: {} };
+}
+function ensureDay(dk) {
+  ensureWeek();
+  if (!data[weekKey()].days[dk]) data[weekKey()].days[dk] = { habits:{}, subjects:{}, q1:'', q2:'', q3:'', mood:0, video:{figure:'',progress:''} };
+}
+function curDay() { return DAY_KEYS[currentDayIdx]; }
+
+// ══════════ WEEK NAVIGATION ══════════
+function changeWeek(dir) {
+  currentWeekStart = addDays(currentWeekStart, dir * 7);
+  renderWeekRange();
+  renderDayTabs();
+  loadDayData();
+  if (document.getElementById('page-review').classList.contains('active')) renderReview();
+}
+function renderWeekRange() {
+  const end = addDays(currentWeekStart, 6);
+  const fmt = d => `${d.getMonth()+1}/${d.getDate()}`;
+  document.getElementById('weekRange').textContent = `${fmt(currentWeekStart)}–${fmt(end)}`;
+}
+
+// ══════════ DAY TABS ══════════
+function renderDayTabs() {
+  const c = document.getElementById('dayTabs'); c.innerHTML = '';
+  DAY_KEYS.forEach((dk, i) => {
+    const d = addDays(currentWeekStart, i);
+    const hasData = data[weekKey()]?.days[dk];
+    const btn = document.createElement('button');
+    btn.className = 'day-tab' + (i === currentDayIdx ? ' active' : '') + (hasData ? ' has-data' : '');
+    btn.innerHTML = `${DAYS[i]}<br><span style="font-size:10px;opacity:.7">${d.getMonth()+1}/${d.getDate()}</span>`;
+    btn.onclick = () => selectDay(i);
+    c.appendChild(btn);
+  });
+  // today title
+  const todayD = addDays(currentWeekStart, currentDayIdx);
+  document.getElementById('todayTitle').textContent = `${DAYS[currentDayIdx]} 打卡`;
+  document.getElementById('todayDate').textContent = `${todayD.getFullYear()}/${todayD.getMonth()+1}/${todayD.getDate()}`;
+}
+function selectDay(i) {
+  currentDayIdx = i; renderDayTabs(); loadDayData();
+}
+
+// ══════════ HABITS GRID ══════════
+function renderHabitsGrid() {
+  const c = document.getElementById('habitsGrid'); c.innerHTML = '';
+  const dk = curDay(); ensureDay(dk);
+  HABITS.forEach(h => {
+    const done = data[weekKey()].days[dk].habits[h.key] || false;
+    const el = document.createElement('div');
+    el.className = 'habit-item' + (done ? ' done' : '');
+    el.innerHTML = `<div class="habit-check">${done ? '✓' : ''}</div><div><div class="habit-name">${h.name}</div><div class="habit-target">${h.target}</div></div>`;
+    el.onclick = () => { toggleHabit(h.key); };
+    c.appendChild(el);
+  });
+}
+function toggleHabit(key) {
+  const dk = curDay(); ensureDay(dk);
+  data[weekKey()].days[dk].habits[key] = !data[weekKey()].days[dk].habits[key];
+  saveData(); renderHabitsGrid(); renderDayTabs();
+}
+
+// ══════════ SUBJECT ROWS ══════════
+function renderSubjectRows() {
+  const c = document.getElementById('subjectRows'); c.innerHTML = '';
+  const dk = curDay(); ensureDay(dk);
+  SUBJECTS.forEach(s => {
+    const val = data[weekKey()].days[dk].subjects[s.key] || 0;
+    const row = document.createElement('div');
+    row.className = 'subject-row';
+    row.innerHTML = `
+      <div class="subject-color" style="background:${s.color}"></div>
+      <div class="subject-name">${s.name}</div>
+      <div class="time-input-wrap">
+        <div class="time-btns">
+          <button class="time-btn" onclick="addTime('${s.key}',-15)">−</button>
+          <button class="time-btn" onclick="addTime('${s.key}',15)">+</button>
+        </div>
+        <input class="time-input" type="number" min="0" step="5" value="${val}" id="si_${s.key}"
+          onchange="setTime('${s.key}',this.value)" oninput="autoSave()">
+        <span class="time-unit">分钟</span>
+      </div>`;
+    c.appendChild(row);
+  });
+}
+function addTime(key, delta) {
+  const dk = curDay(); ensureDay(dk);
+  const cur = data[weekKey()].days[dk].subjects[key] || 0;
+  const nv = Math.max(0, cur + delta);
+  data[weekKey()].days[dk].subjects[key] = nv;
+  const inp = document.getElementById('si_' + key);
+  if (inp) inp.value = nv;
+  saveData(); renderDayTabs();
+}
+function setTime(key, val) {
+  const dk = curDay(); ensureDay(dk);
+  data[weekKey()].days[dk].subjects[key] = Math.max(0, parseInt(val)||0);
+  saveData(); renderDayTabs();
+}
+
+// ══════════ MOOD ══════════
+function setMood(m, btn) {
+  const dk = curDay(); ensureDay(dk);
+  data[weekKey()].days[dk].mood = m;
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  saveData();
+}
+
+// ══════════ LOAD / SAVE DAY ══════════
+function loadDayData() {
+  const dk = curDay();
+  const d = data[weekKey()]?.days[dk] || {};
+  document.getElementById('q1').value = d.q1 || '';
+  document.getElementById('q2').value = d.q2 || '';
+  document.getElementById('q3').value = d.q3 || '';
+  document.getElementById('videoFigure').value = d.video?.figure || '';
+  document.getElementById('videoProgress').value = d.video?.progress || '';
+  // mood
+  document.querySelectorAll('.mood-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.mood) === (d.mood||0));
+  });
+  renderHabitsGrid();
+  renderSubjectRows();
+}
+function autoSave() {
+  const dk = curDay(); ensureDay(dk);
+  const dayData = data[weekKey()].days[dk];
+  dayData.q1 = document.getElementById('q1').value;
+  dayData.q2 = document.getElementById('q2').value;
+  dayData.q3 = document.getElementById('q3').value;
+  dayData.video = {
+    figure: document.getElementById('videoFigure').value,
+    progress: document.getElementById('videoProgress').value,
+  };
+  SUBJECTS.forEach(s => {
+    const inp = document.getElementById('si_' + s.key);
+    if (inp) dayData.subjects[s.key] = parseInt(inp.value)||0;
+  });
+  saveData();
+}
+function saveDay() {
+  autoSave(); renderDayTabs();
+  toast('✓ 今天的记录已保存！');
+}
+
+// ══════════ WEEKLY REVIEW ══════════
+function renderReview() {
+  document.getElementById('reviewSubTitle').textContent =
+    `${weekKey()} 这一周的完成情况`;
+
+  // load weekly text
+  const wk = data[weekKey()]?.weekly || {};
+  document.getElementById('wk_gain').value = wk.gain || '';
+  document.getElementById('wk_improve').value = wk.improve || '';
+  document.getElementById('wk_next').value = wk.next || '';
+
+  // HABIT PROGRESS
+  const hc = document.getElementById('habitProgress'); hc.innerHTML = '';
+  HABITS.forEach(h => {
+    let count = 0;
+    DAY_KEYS.forEach(dk => { if (data[weekKey()]?.days[dk]?.habits?.[h.key]) count++; });
+    const pct = Math.round(count/7*100);
+    const color = pct >= 85 ? 'var(--teal)' : pct >= 50 ? 'var(--gold)' : 'var(--rose)';
+    hc.innerHTML += `<div class="habit-progress-row">
+      <div class="progress-label">${h.name}</div>
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
+      <div class="progress-val">${count}/7天</div>
+    </div>`;
+  });
+
+  // DAILY BAR CHART (total study per day)
+  const bc = document.getElementById('dailyBarChart'); bc.innerHTML = '';
+  const dayTotals = DAY_KEYS.map(dk => {
+    const subj = data[weekKey()]?.days[dk]?.subjects || {};
+    return Object.values(subj).reduce((a,b) => a+(b||0), 0);
+  });
+  const maxT = Math.max(...dayTotals, 1);
+  dayTotals.forEach((t, i) => {
+    const h = Math.round(t/maxT * 100);
+    const col = document.createElement('div');
+    col.className = 'bar-col';
+    col.innerHTML = `<div class="bar-val">${t>0?t:''}</div>
+      <div class="bar" style="height:${Math.max(h,t>0?4:0)}px;background:var(--accent);opacity:${0.5+h/200}"></div>
+      <div class="bar-label">${DAYS[i].replace('周','')}</div>`;
+    bc.appendChild(col);
+  });
+
+  // SUBJECT SUMMARY
+  const ss = document.getElementById('subjectSummary'); ss.innerHTML = '';
+  const totals = {};
+  SUBJECTS.forEach(s => { totals[s.key] = 0; });
+  DAY_KEYS.forEach(dk => {
+    const subj = data[weekKey()]?.days[dk]?.subjects || {};
+    SUBJECTS.forEach(s => { totals[s.key] += subj[s.key] || 0; });
+  });
+  const maxSubj = Math.max(...Object.values(totals), 1);
+  SUBJECTS.forEach(s => {
+    const t = totals[s.key];
+    if (t === 0) return;
+    ss.innerHTML += `<div class="subj-summary-row">
+      <div style="min-width:70px;font-size:13px;font-weight:500">${s.name}</div>
+      <div class="subj-bar-wrap"><div class="subj-bar-fill" style="width:${Math.round(t/maxSubj*100)}%;background:${s.color}"></div></div>
+      <div class="subj-total">${Math.round(t/60*10)/10}h</div>
+    </div>`;
+  });
+  if (ss.innerHTML === '') ss.innerHTML = '<div class="empty">本周还没有记录学习时间</div>';
+}
+
+function saveWeekly() {
+  ensureWeek();
+  data[weekKey()].weekly = {
+    gain: document.getElementById('wk_gain').value,
+    improve: document.getElementById('wk_improve').value,
+    next: document.getElementById('wk_next').value,
+  };
+  saveData();
+}
+
+// ══════════ STATS PAGE ══════════
+function renderStats() {
+  // aggregate all weeks
+  let totalDays = 0, totalStudyMin = 0, totalHabitChecks = 0, totalHabitPossible = 0;
+  const semSubjects = {}; SUBJECTS.forEach(s => semSubjects[s.key] = 0);
+  const semHabits = {}; HABITS.forEach(h => { semHabits[h.key] = {done:0, possible:0}; });
+  let videoCount = 0;
+
+  Object.values(data).forEach(wk => {
+    if (!wk.days) return;
+    Object.values(wk.days).forEach(day => {
+      totalDays++;
+      SUBJECTS.forEach(s => { semSubjects[s.key] += day.subjects?.[s.key] || 0; totalStudyMin += day.subjects?.[s.key] || 0; });
+      HABITS.forEach(h => {
+        semHabits[h.key].possible++;
+        if (day.habits?.[h.key]) { semHabits[h.key].done++; totalHabitChecks++; }
+        totalHabitPossible++;
+      });
+      if (day.video?.figure) videoCount++;
+    });
+  });
+
+  // stat cards
+  const sc = document.getElementById('semesterStats');
+  const weeks = Object.keys(data).length;
+  sc.innerHTML = `
+    <div class="stat-card"><div class="stat-num">${weeks}</div><div class="stat-lbl">已记录周数</div></div>
+    <div class="stat-card"><div class="stat-num">${Math.round(totalStudyMin/60)}</div><div class="stat-lbl">总学习小时</div></div>
+    <div class="stat-card"><div class="stat-num">${totalHabitPossible>0?Math.round(totalHabitChecks/totalHabitPossible*100):0}%</div><div class="stat-lbl">习惯坚持率</div></div>
+    <div class="stat-card"><div class="stat-num">${videoCount}</div><div class="stat-lbl">名人研究天数</div></div>`;
+
+  // subject table
+  const st = document.getElementById('semSubjectTable');
+  const sorted = SUBJECTS.map(s => ({...s, total: semSubjects[s.key]})).sort((a,b) => b.total-a.total);
+  st.innerHTML = `<table class="sem-table">
+    <tr><th>科目</th><th>累计时间</th><th>占比</th></tr>
+    ${sorted.map(s => s.total > 0 ? `<tr>
+      <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${s.color};margin-right:6px;vertical-align:middle"></span>${s.name}</td>
+      <td>${Math.round(s.total/60*10)/10} 小时</td>
+      <td style="color:var(--muted)">${totalStudyMin>0?Math.round(s.total/totalStudyMin*100):0}%</td>
+    </tr>` : '').join('')}
+  </table>`;
+  if (totalStudyMin === 0) st.innerHTML = '<div class="empty">还没有学习记录</div>';
+
+  // habits
+  const sh = document.getElementById('semHabitStats'); sh.innerHTML = '';
+  HABITS.forEach(h => {
+    const pct = semHabits[h.key].possible > 0 ?
+      Math.round(semHabits[h.key].done / semHabits[h.key].possible * 100) : 0;
+    const color = pct >= 80 ? 'var(--teal)' : pct >= 50 ? 'var(--gold)' : 'var(--rose)';
+    sh.innerHTML += `<div class="habit-progress-row">
+      <div class="progress-label">${h.name}</div>
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
+      <div class="progress-val">${pct}%</div>
+    </div>`;
+  });
+
+  // video
+  const vd = document.getElementById('videoStats');
+  const allFigures = [];
+  Object.values(data).forEach(wk => {
+    Object.values(wk.days||{}).forEach(day => {
+      if (day.video?.figure) allFigures.push(day.video.figure);
+    });
+  });
+  const uniq = [...new Set(allFigures)];
+  vd.innerHTML = uniq.length > 0
+    ? `<div style="font-size:13px;color:var(--muted);margin-bottom:8px">已研究 ${uniq.length} 位人物</div>` +
+      uniq.map(f => `<div style="font-size:13px;padding:5px 0;border-bottom:1px solid var(--faint)">· ${f}</div>`).join('')
+    : '<div class="empty">还没有开始视频项目</div>';
+}
+
+// ══════════ EXPORT ══════════
+function exportCSV() {
+  const wk = data[weekKey()]; if (!wk) { toast('本周没有数据'); return; }
+  let csv = '日期,星期,' + SUBJECTS.map(s=>s.name).join(',') + ',' + HABITS.map(h=>h.name).join(',') + ',今日突破,心情\n';
+  DAY_KEYS.forEach((dk,i) => {
+    const d = wk.days[dk] || {}; const date = addDays(currentWeekStart,i);
+    const subjs = SUBJECTS.map(s => d.subjects?.[s.key]||0).join(',');
+    const habits = HABITS.map(h => d.habits?.[h.key] ? '✓' : '').join(',');
+    csv += `${date.getMonth()+1}/${date.getDate()},${DAYS[i]},${subjs},${habits},"${(d.q1||'').replace(/"/g,'""')}",${d.mood||''}\n`;
+  });
+  download(`周看板_${weekKey()}.csv`, csv, 'text/csv;charset=utf-8;');
+  toast('已导出 CSV');
+}
+
+function exportWeekSummary() {
+  const wk = data[weekKey()]; if (!wk) { toast('本周没有数据'); return; }
+  let txt = `周看板报告 ${weekKey()}\n${'='.repeat(40)}\n\n`;
+  // study totals
+  const totals = {}; SUBJECTS.forEach(s => totals[s.key]=0);
+  DAY_KEYS.forEach(dk => { SUBJECTS.forEach(s => { totals[s.key] += wk.days[dk]?.subjects?.[s.key]||0; }); });
+  txt += '【学习时间汇总】\n';
+  SUBJECTS.forEach(s => { if(totals[s.key]>0) txt += `  ${s.name}: ${Math.round(totals[s.key]/60*10)/10}小时\n`; });
+  txt += '\n【习惯完成情况】\n';
+  HABITS.forEach(h => {
+    let c=0; DAY_KEYS.forEach(dk => { if(wk.days[dk]?.habits?.[h.key]) c++; });
+    txt += `  ${h.name}: ${c}/7天\n`;
+  });
+  txt += '\n【本周总结】\n';
+  if (wk.weekly?.gain) txt += `  收获: ${wk.weekly.gain}\n`;
+  if (wk.weekly?.improve) txt += `  改进: ${wk.weekly.improve}\n`;
+  if (wk.weekly?.next) txt += `  下周: ${wk.weekly.next}\n`;
+  download(`周报告_${weekKey()}.txt`, txt, 'text/plain;charset=utf-8;');
+  toast('已导出周报告');
+}
+
+function exportSemester() {
+  let csv = '周次,星期,日期,' + SUBJECTS.map(s=>s.name).join(',') + ',总学习(分钟)\n';
+  Object.entries(data).sort().forEach(([wkKey, wk]) => {
+    DAY_KEYS.forEach((dk, i) => {
+      const day = wk.days?.[dk]; if (!day) return;
+      const subjs = SUBJECTS.map(s => day.subjects?.[s.key]||0);
+      const total = subjs.reduce((a,b)=>a+b,0);
+      csv += `${wkKey},${DAYS[i]},${wkKey},${subjs.join(',')},${total}\n`;
+    });
+  });
+  download(`学期总览_${new Date().toLocaleDateString('zh-CN')}.csv`, csv, 'text/csv;charset=utf-8;');
+  toast('已导出学期数据');
+}
+
+function download(filename, content, type) {
+  const blob = new Blob(['\ufeff'+content], {type});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename; a.click();
+}
+
+// ══════════ NAVIGATION ══════════
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'review') renderReview();
+  if (name === 'stats') renderStats();
+}
+
+// ══════════ TOAST ══════════
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ══════════ INIT ══════════
+loadData();
+renderWeekRange();
+renderDayTabs();
+loadDayData();
+document.getElementById('todayDate').textContent =
+  (() => { const n=new Date(); return `${n.getFullYear()}/${n.getMonth()+1}/${n.getDate()}`; })();
+</script>
+</body>
+</html>
